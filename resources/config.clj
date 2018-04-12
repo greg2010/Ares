@@ -1,5 +1,0 @@
-(ns config)
-
-(def config {
-
-             })

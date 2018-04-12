@@ -1,0 +1,8 @@
+{
+ :discord-wh "http://WH"
+ :relevant-entities {
+                     :corporation-ids []
+                     :alliance-ids [1354830081]
+                     :all false
+                     }
+ }

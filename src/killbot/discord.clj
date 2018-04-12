@@ -1,15 +1,15 @@
 (ns killbot.discord
   (:require [clj-http.client :as client]
-            [killbot.esi :as esi]
             [mount.core :as mount]
-            [killbot.zkb :refer [zkb]]
             [clojure.core.async
              :refer [>! <! >!! <!! go chan buffer close! thread
                      alts! alts!! timeout]]
-            [clojure.tools.logging :as log]))
+            [clojure.tools.logging :as log]
+            [cheshire.core :refer :all]
+            [killbot.util :refer :all]
+            [killbot.config :refer [config]]))
 
-(def ^{:private true} discord-vars {:discord-wh      "REDACTED"
-                                    :base-url        "https://zkillboard.com/kill"
+(def ^{:private true} discord-vars {:base-url        "https://zkillboard.com/kill"
                                     :img-eve-baseurl "http://imageserver.eveonline.com"
                                     :colors          {
                                                       :red   (long 0x990000)
@@ -20,22 +20,6 @@
 
 (defn get-final-blow [km-package] (first (filter #(:final_blow %) (get-in km-package [:killmail :attackers]))))
 
-(defn extract-ids [involved]
-  [(:ship_type_id involved)
-   (:character_id involved)
-   (:corporation_id involved)
-   (:alliance_id involved)])
-
-(defn collect-ids [km-package]
-  (let [victim (get-in km-package [:killmail :victim])
-        final-blow (get-final-blow km-package)]
-    (remove nil? (flatten
-                   [(extract-ids victim)
-                    [(get-in km-package [:killmail :solar_system_id])]
-                    (if
-                      (not (nil? final-blow))
-                      (extract-ids final-blow)
-                      [])]))))
 
 (defn generate-title [victim solar-system-id names]
 
@@ -79,7 +63,7 @@
 
 
 (defn generate-embed [km-package]
-  (let [names (esi/get-names (collect-ids km-package))
+  (let [names (:names km-package)
         victim (get-in km-package [:killmail :victim])
         solar-system-id (get-in km-package [:killmail :solar_system_id])
         title (generate-title victim solar-system-id names)
@@ -135,27 +119,31 @@
                  }
      }))
 
-(defn post-to-wh [data]
-  (try
-    (client/post (:discord-wh discord-vars) {:form-params data :content-type :json})
-    (catch Exception e (log/error "Caught exception while posting data to a discord webhook" e)
-                       (throw e))))
+(defn post-to-wh [data] (client/post (:discord-wh config) {:form-params data :content-type :json}))
 
 (defn post-embed [embed] (post-to-wh {:embeds [embed]}))
 
+(defn process! [km-package]
+  (try
+    (log/debug (str "Processing km package " (:killID km-package)))
+    (post-embed (generate-embed km-package))
+    (log/debug (str "Processed km package " (:killID km-package)))
+    (catch Exception e (payload-http-exception-handler e km-package process!))))
+
 (defn pull-and-process! [mailbox]
-  (let
-    [km-package (<!! mailbox)]
-    (try
-      (post-embed (generate-embed km-package))
-      (catch Exception _ (log/error (str "Offending km package:\n" km-package))))))
+  (while true (process! (<!! mailbox))))
 
 (defn start []
-  (let [running? (atom true)
-        daemon (go (while @running? (pull-and-process! (:mailbox zkb))))]
-    {:running running? :daemon daemon}))
+  (let [worker-count 8
+        mailbox (chan worker-count)
+        worker-thread-pool (get-thread-pool worker-count)]
+    (log/info "Starting discord component")
+    (submit-to-thread-pool worker-thread-pool (fn [] (pull-and-process! mailbox)) worker-count)
+    {:mailbox mailbox :tp worker-thread-pool}))
 
-(defn stop [discord] (reset! (:running discord) false))
+(defn stop [discord]
+  (log/info "Stopping discord component")
+  (shutdown-thread-pool (:tp discord)))
 
 (mount/defstate discord
                 :start (start)

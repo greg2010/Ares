@@ -9,7 +9,8 @@
                  [clj-http "3.8.0"]
                  [cheshire "5.8.0"]
                  [org.clojure/core.async "0.4.474"]
-                 [mount "0.1.12"]]
+                 [mount "0.1.12"]
+                 [org.clojure/tools.cli "0.3.6"]]
   :main ^:skip-aot killbot.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

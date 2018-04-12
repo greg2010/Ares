@@ -2,12 +2,13 @@
   (:require [clj-http.client :as client]
             [cheshire.core :refer :all]
             [mount.core :as mount]
+            [killbot.config :refer [config]]
             [clojure.core.async
              :refer [>! <! >!! <!! go go-loop chan buffer close! thread
                      alts! alts!! timeout]]
+            [killbot.util :refer :all]
             [clojure.tools.logging :as log]))
 
-(def relevant {:alliance-ids [1 2 3] :corp-ids [4 5 6]})
 
 (def ^{:private true} zkb-vars {:redisq-url "https://redisq.zkillboard.com/listen.php"
                                 :base-url   "https://zkillboard.com/kill"})
@@ -18,13 +19,14 @@
         alliance-id (get-in km-package [:killmail :victim :alliance_id])]
     (not
       (nil?
-        (or (some #(= corp-id %) (:corp-ids relevant))
-            (some #(= alliance-id %) (:alliance-ids relevant)))))))
+        (or (some #(= corp-id %) (get-in config [:relevant-entities :corporation-ids]))
+            (some #(= alliance-id %) (get-in config [:relevant-entities :alliance-ids])))))))
 
-(defn poll [] (let [_ (log/debug "Polling from zkb")
-                    km-package (try
-                                 (:package (parse-string (:body (client/get (:redisq-url zkb-vars) {:accept :json})) true))
-                                 (catch Exception e (log/error "Caught exception while trying to pull from zkb" e)))]
+(defn poll* [] (:package (parse-string (:body (client/get (:redisq-url zkb-vars) {:accept :json})) true)))
+
+(defn poll [_] (let [km-package (try (log/debug "Polling from zkb")
+                                    (poll*)
+                                    (catch Exception e (payload-http-exception-handler e nil poll)))]
                 (if (not (nil? km-package)) (merge km-package {:friendly (friendly? km-package)}))))
 
 (defn relevant?
@@ -34,24 +36,30 @@
          attackers-corp-ids (vec (map :corporation_id (get-in km-package [:killmail :attackers])))
          attackers-alliance-ids (vec (map :alliance_id (get-in km-package [:killmail :attackers])))]
      (not (nil?
-            (or (some (set (:corp-ids relevant)) (conj [victim-corp-id] attackers-corp-ids))
-                (some (set (:alliance-ids relevant)) (conj [victim-alliance-id] attackers-alliance-ids)))))))
+            (or (some (set (get-in config [:relevant-entities :corporation-ids])) (flatten (conj [victim-corp-id] attackers-corp-ids)))
+                (some (set (get-in config [:relevant-entities :alliance-ids])) (flatten (conj [victim-alliance-id] attackers-alliance-ids))))))))
   ([km-package skip-eval] (if skip-eval true (relevant? km-package))))
 
-(defn push-if-relevant! [payload mailbox]
-  (log/trace "Pushing payload to mailbox if relevant" payload)
-  (if
-    (and (relevant? payload true) (not (nil? payload)))
-    (>!! mailbox payload)))
+(defn poll-and-push-if-relevant! [mailbox]
+  (while true
+    (let [km-package (poll nil)]
+      (log/trace "Pushing payload to mailbox if relevant" km-package)
+      (if
+        (and (relevant? km-package (get-in config [:relevant-entities :all])) (not (nil? km-package)))
+        (>!! mailbox km-package)))))
 
 
 (defn start []
-  (let [mailbox (chan 5)
-        running? (atom true)
-        daemon (go (while @running? (push-if-relevant! (poll) mailbox)))]
-    {:mailbox mailbox :running running? :daemon daemon}))
+  (let [worker-count 1
+        mailbox (chan worker-count)
+        worker-thread-pool (get-thread-pool worker-count)]
+    (log/info "Starting zkb component")
+    (submit-to-thread-pool worker-thread-pool (fn [] (poll-and-push-if-relevant! mailbox)) worker-count)
+    {:mailbox mailbox :tp worker-thread-pool}))
 
-(defn stop [zkb] (reset! (:running zkb) false))
+(defn stop [zkb]
+  (log/info "Stopping zkb component")
+  (shutdown-thread-pool (:tp zkb)))
 
 (mount/defstate zkb
                 :start (start)

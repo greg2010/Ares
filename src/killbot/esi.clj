@@ -11,7 +11,7 @@
             [mount.core :as mount]))
 
 
-(def ^{:private true} esi-vars {:base-url "https://esi.tech.ccp.is/latest"
+(def ^{:private true} esi-vars {:base-url   "https://esi.tech.ccp.is/latest"
                                 :datasource {"datasource" "tranquility"}})
 
 (defn get-final-blow [km-package] (first (filter #(:final_blow %) (get-in km-package [:killmail :attackers]))))
@@ -25,23 +25,25 @@
 (defn collect-ids [km-package]
   (let [victim (get-in km-package [:killmail :victim])
         final-blow (get-final-blow km-package)]
-    (remove nil? (flatten
-                   [(extract-ids victim)
-                    [(get-in km-package [:killmail :solar_system_id])]
-                    (if
-                      (not (nil? final-blow))
-                      (extract-ids final-blow)
-                      [])]))))
+    (vec
+      (distinct
+        (remove nil? (flatten
+                       [(extract-ids victim)
+                        [(get-in km-package [:killmail :solar_system_id])]
+                        (if
+                          (not (nil? final-blow))
+                          (extract-ids final-blow)
+                          [])]))))))
 
 (defn get-names* [ids]
   (parse-string
     (:body
       (client/post
         (str (:base-url esi-vars) "/universe/names/")
-        {:form-params ids
+        {:form-params  ids
          :content-type :json
          :query-params (:datasource esi-vars)
-         :accept :json})
+         :accept       :json})
       ) true))
 
 (defn get-names [ids]

@@ -4,6 +4,7 @@
     [killbot.discord]
     [killbot.zkb]
     [killbot.esi]
+    [killbot.router]
     [mount.core :as mount]
     [clojure.tools.logging :as log]
     [clojure.java.io :as io]

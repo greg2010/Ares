@@ -10,16 +10,16 @@
       (uncaughtException [_ thread ex]
         (log/error ex "Uncaught exception on" (.getName thread))))))
 
-(defn payload-http-exception-handler [e payload fn]
+(defn payload-http-exception-handler [e payload fn init-delay]
   (case
     (:status (ex-data e))
     429 (let [body (parse-string (:body (ex-data e)) true)
               retry-after (:retry_after body)
-              delay (+ 100 (if (nil? retry-after) 1000 retry-after))]
+              delay (+ 100 (if (nil? retry-after) init-delay retry-after))]
           (log/debug (str "Encountered rate limit for "
-                         retry-after
-                         " type: "
-                         (if (:global body) "global" "local")))
+                          retry-after
+                          " type: "
+                          (if (:global body) "global" "local")))
           (log/info (str "Delaying thread for " delay "ms"))
           (Thread/sleep delay)
           (fn payload))
@@ -30,6 +30,6 @@
 
 (defn submit-to-thread-pool [tp fn count]
   (dotimes [_ count]
-    (.execute (do (Thread/setDefaultUncaughtExceptionHandler default-uncaught-exception-handler) tp) fn )))
+    (.execute (do (Thread/setDefaultUncaughtExceptionHandler default-uncaught-exception-handler) tp) fn)))
 
 (defn shutdown-thread-pool [tp] (.shutdown tp))

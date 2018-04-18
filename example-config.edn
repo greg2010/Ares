@@ -1,8 +1,12 @@
 {
- :discord-wh "http://WH"
- :relevant-entities {
-                     :corporation-ids []
-                     :alliance-ids [1354830081]
-                     :all false
-                     }
- }
+ :destinations [
+                {
+                 :discord-wh        "http://WH"
+                 :bot-name          "Your bot name here"
+                 :bot-picture       "URL to your bot avatar here"
+                 :relevant-entities {
+                                     :corporation-ids []
+                                     :alliance-ids    [1354830081]
+                                     :all             false
+                                     }
+                 }]}

@@ -62,7 +62,7 @@
 (defn- generate-image-by-id [id] (str (:img-eve-baseurl discord-vars) "/type/" id "_64.png"))
 
 
-(defn- generate-embed [km-package]
+(defn generate-embed [km-package]
   (let [names (:names km-package)
         victim (get-in km-package [:killmail :victim])
         solar-system-id (get-in km-package [:killmail :solar_system_id])
@@ -128,7 +128,7 @@
                                                        {:avatar_url (get-in dest [:discord-wh :bot-picture])})
                                   :content-type :json}))
 
-(defn- post-embed! [dest embed] (post-to-wh! dest {:embeds [embed]}))
+(defn post-embed! [dest embed] (post-to-wh! dest {:embeds [embed]}))
 
 (defn- process*! [dest km-package]
   (try

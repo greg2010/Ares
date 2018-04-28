@@ -27,7 +27,7 @@
 
 (defn- poll* [] (:package (parse-string (:body (client/get (:redisq-url zkb-vars) {:accept :json})) true)))
 
-(defn- poll [_]
+(defn poll [_]
   (try (log/debug "Polling from zkb")
        (poll*)
        (catch Exception e (payload-http-exception-handler e nil poll 10000))))

@@ -10,7 +10,7 @@
             [killbot.util :refer :all]
             [clojure.tools.logging :as log]))
 
-(defn- relevant?
+(defn relevant?
   ([km-package destination]
    (let [victim-char-id (get-in km-package [:killmail :victim :character_id])
          victim-corp-id (get-in km-package [:killmail :victim :corporation_id])
@@ -24,11 +24,11 @@
               (some (set (get-in destination [:relevant-entities :region-ids]))
                     [(get-in km-package [:killmail :region_id])])
               (some (set (get-in destination [:relevant-entities :character-ids]))
-                    (flatten (conj [victim-char-id] attackers-char-ids)))
+                    (flatten (conj attackers-char-ids victim-char-id)))
               (some (set (get-in destination [:relevant-entities :corporation-ids]))
-                    (flatten (conj [victim-corp-id] attackers-corp-ids)))
+                    (flatten (conj attackers-corp-ids victim-corp-id)))
               (some (set (get-in destination [:relevant-entities :alliance-ids]))
-                    (flatten (conj [victim-alliance-id] attackers-alliance-ids)))))))))
+                    (flatten (conj attackers-alliance-ids victim-alliance-id)))))))))
 
 
 (defn- km-package-router [km-package]

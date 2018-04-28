@@ -54,7 +54,7 @@
       ) true))
 
 
-(defn- get-names [ids]
+(defn get-names [ids]
   (let [resp (if
                (not (empty? ids))
                (try (get-names* ids)
@@ -90,7 +90,7 @@
      :region_id        (:region_id const)}))
 
 
-(defn- get-location [id]
+(defn get-location [id]
   (when
     (not (nil? id))
     (try (get-location* id)
@@ -99,9 +99,7 @@
 
 (defn- get-location-transformer [km-package]
   (log/debug "Enriching package with id " (:killID km-package) " with region id")
-  (merge km-package
-         {:killmail (merge (:killmail km-package)
-                           (get-location (get-in km-package [:killmail :solar_system_id])))}))
+  (update km-package :killmail #(merge % (get-location (:solar_system_id %)))))
 
 
 (defn- get-location-transducer [xf]

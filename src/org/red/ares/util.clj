@@ -1,4 +1,4 @@
-(ns killbot.util
+(ns org.red.ares.util
   (:require [clojure.tools.logging :as log]
             [cheshire.core :refer :all])
   (:import (java.util.concurrent Executors)))

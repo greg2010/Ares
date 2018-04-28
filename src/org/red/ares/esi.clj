@@ -1,10 +1,10 @@
-(ns killbot.esi
+(ns org.red.ares.esi
   (:require [clj-http.client :as client]
             [cheshire.core :refer :all]
             [clojure.tools.logging :as log]
-            [killbot.discord :refer [discord]]
-            [killbot.zkb :refer [zkb]]
-            [killbot.util :refer :all]
+            [org.red.ares.discord :refer [discord]]
+            [org.red.ares.zkb :refer [zkb]]
+            [org.red.ares.util :refer :all]
             [clojure.core.async
              :refer [>! <! >!! <!! go go-loop pipeline chan buffer close! thread
                      alts! alts!! timeout]]

@@ -1,4 +1,4 @@
-(ns killbot.discord
+(ns org.red.ares.discord
   (:require [clj-http.client :as client]
             [mount.core :as mount]
             [clojure.core.async
@@ -6,8 +6,8 @@
                      alts! alts!! timeout]]
             [clojure.tools.logging :as log]
             [cheshire.core :refer :all]
-            [killbot.util :refer :all]
-            [killbot.config :refer [config]]))
+            [org.red.ares.util :refer :all]
+            [org.red.ares.config :refer [config]]))
 
 (def ^{:private true} discord-vars {:base-url        "https://zkillboard.com/kill"
                                     :img-eve-baseurl "http://imageserver.eveonline.com"

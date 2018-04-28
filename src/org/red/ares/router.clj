@@ -1,13 +1,13 @@
-(ns killbot.router
+(ns org.red.ares.router
   (:require [mount.core :as mount]
-            [killbot.config :refer [config]]
-            [killbot.zkb :refer [zkb]]
-            [killbot.esi :refer [esi]]
-            [killbot.discord :refer [discord]]
+            [org.red.ares.config :refer [config]]
+            [org.red.ares.zkb :refer [zkb]]
+            [org.red.ares.esi :refer [esi]]
+            [org.red.ares.discord :refer [discord]]
+            [org.red.ares.util :refer :all]
             [clojure.core.async
              :refer [>! <! >!! <!! go go-loop chan buffer close! thread
                      alts! alts!! timeout pipeline]]
-            [killbot.util :refer :all]
             [clojure.tools.logging :as log]))
 
 (defn relevant?

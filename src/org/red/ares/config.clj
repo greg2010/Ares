@@ -1,4 +1,4 @@
-(ns killbot.config
+(ns org.red.ares.config
   (:require
     [mount.core :as mount]
     [clojure.tools.logging :as log]))

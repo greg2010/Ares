@@ -1,12 +1,12 @@
-(ns killbot.zkb
+(ns org.red.ares.zkb
   (:require [clj-http.client :as client]
             [cheshire.core :refer :all]
             [mount.core :as mount]
-            [killbot.config :refer [config]]
+            [org.red.ares.util :refer :all]
+            [org.red.ares.config :refer [config]]
             [clojure.core.async
              :refer [>! <! >!! <!! go go-loop chan buffer close! thread
                      alts! alts!! timeout]]
-            [killbot.util :refer :all]
             [clojure.tools.logging :as log]))
 
 

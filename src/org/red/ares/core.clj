@@ -1,10 +1,10 @@
-(ns killbot.core
+(ns org.red.ares.core
   (:require
-    [killbot.config]
-    [killbot.discord]
-    [killbot.zkb]
-    [killbot.esi]
-    [killbot.router]
+    [org.red.ares.config]
+    [org.red.ares.discord]
+    [org.red.ares.zkb]
+    [org.red.ares.esi]
+    [org.red.ares.router]
     [mount.core :as mount]
     [clojure.tools.logging :as log]
     [clojure.java.io :as io]

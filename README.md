@@ -24,6 +24,7 @@ Example config can be found [here](https://raw.githubusercontent.com/greg2010/Ar
 
 ## Change Log
 
+* Version 0.3.1-SNAPSHOT - Fix bug that caused all killmails to be recognized as not friendly
 * Version 0.3.0-SNAPSHOT - Support for multiple destinations, filtering based on region
 * Version 0.1.0-SNAPSHOT - Initial release
 

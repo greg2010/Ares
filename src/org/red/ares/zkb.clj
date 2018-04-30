@@ -14,17 +14,6 @@
                                 :base-url   "https://zkillboard.com/kill"})
 
 
-(defn- friendly? [km-package]
-  (let [char-id (get-in km-package [:killmail :victim :character_id])
-        corp-id (get-in km-package [:killmail :victim :corporation_id])
-        alliance-id (get-in km-package [:killmail :victim :alliance_id])]
-    (not (nil?
-           (or (some #(= char-id %) (get-in config [:relevant-entities :character-ids]))
-               (some #(= corp-id %) (get-in config [:relevant-entities :corporation-ids]))
-               (some #(= alliance-id %) (get-in config [:relevant-entities :alliance-ids])))))))
-
-(defn- enrich-friendly [km-package] (when (not (nil? km-package)) (merge km-package {:friendly (friendly? km-package)})))
-
 (defn- poll* [] (:package (parse-string (:body (client/get (:redisq-url zkb-vars) {:accept :json})) true)))
 
 (defn poll [_]
@@ -34,7 +23,7 @@
 
 (defn- poll-and-push! [mailbox]
   (while true
-    (let [km-package (enrich-friendly (poll nil))]
+    (let [km-package (poll nil)]
       (when (not (nil? km-package))
         (log/debug (str "Pushing payload to mailbox with killID " (:killID km-package)))
         (>!! mailbox km-package)))))

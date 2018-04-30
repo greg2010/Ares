@@ -62,7 +62,7 @@
 (defn- generate-image-by-id [id] (str (:img-eve-baseurl discord-vars) "/type/" id "_64.png"))
 
 
-(defn generate-embed [km-package]
+(defn generate-embed [km-package friendly]
   (let [names (:names km-package)
         victim (get-in km-package [:killmail :victim])
         solar-system-id (get-in km-package [:killmail :solar_system_id])
@@ -77,7 +77,7 @@
      :url       url
      :thumbnail {:url thumbnail-url}
      :timestamp timestamp
-     :color     (if (:friendly km-package) (get-in discord-vars [:colors :red]) (get-in discord-vars [:colors :green]))
+     :color     (if friendly (get-in discord-vars [:colors :red]) (get-in discord-vars [:colors :green]))
      :fields    (filter #(not (nil? %))
                         [(if (contains? victim :character_id)
                            {
@@ -133,14 +133,14 @@
 (defn- process*! [dest km-package]
   (try
     (log/debug (str "Processing km package " (:killID km-package)))
-    (post-embed! dest (generate-embed km-package))
+    (let
+      [cur-friendly (get (:friendlies km-package) (get-in dest [:discord-wh :url]))]
+      (post-embed! dest (generate-embed km-package cur-friendly)))
     (log/debug (str "Processed km package " (:killID km-package)))
     (catch Exception e (payload-http-exception-handler e km-package (partial process*! dest) 1000))))
 
 
 (defn- chan-process! [dest mailbox] (while true (process*! dest (<!! mailbox))))
-
-
 
 (defn- pull-and-route! [mailbox channel-map]
   (while true

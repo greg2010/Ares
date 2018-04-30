@@ -31,15 +31,27 @@
                     (flatten (conj attackers-alliance-ids victim-alliance-id)))))))))
 
 
+(defn friendly? [km-package destination]
+  (let [char-id (get-in km-package [:killmail :victim :character_id])
+        corp-id (get-in km-package [:killmail :victim :corporation_id])
+        alliance-id (get-in km-package [:killmail :victim :alliance_id])]
+    (not (nil?
+           (or (some #(= char-id %) (get-in destination [:relevant-entities :character-ids]))
+               (some #(= corp-id %) (get-in destination [:relevant-entities :corporation-ids]))
+               (some #(= alliance-id %) (get-in destination [:relevant-entities :alliance-ids])))))))
+
+
 (defn- km-package-router [km-package]
   (let
-    [destinations (filter #(relevant? km-package %) (:destinations config))]
+    [destinations (filter #(relevant? km-package %) (:destinations config))
+     friendly (into {}
+                    (map #(hash-map (get-in % [:discord-wh :url]) (friendly? km-package %)) destinations))]
     (when (not (empty? destinations))
       (log/debug "Determined that package with id "
                  (:killID km-package)
                  " goes to destinations with names"
                  (map #(str " " (get-in % [:discord-wh :bot-name])) destinations))
-      (merge km-package {:destinations destinations}))))
+      (merge km-package {:destinations destinations} {:friendlies friendly}))))
 
 
 (defn- km-package-router-transducer [xf]

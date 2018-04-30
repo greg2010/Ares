@@ -1,4 +1,4 @@
-(defproject org.red/ares "0.3.0-SNAPSHOT"
+(defproject org.red/ares "0.3.1-SNAPSHOT"
   :description "FIXME: write description"
   :url "http://example.com/FIXME"
   :license {:name "MIT"
@@ -11,6 +11,6 @@
                  [org.clojure/core.async "0.4.474"]
                  [mount "0.1.12"]
                  [org.clojure/tools.cli "0.3.6"]]
-  :main ^:skip-aot killbot.core
+  :main ^:skip-aot org.red.ares.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

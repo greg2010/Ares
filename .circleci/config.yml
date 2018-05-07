@@ -1,0 +1,19 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/ares
+    docker:
+      - image: circleci/clojure:lein-2.8.1
+    steps:
+      - checkout
+      - restore_cache:
+          key: ares-{{ checksum "project.clj" }}
+      - run: lein deps
+      - save_cache:
+          paths:
+            - ~/.m2
+          key: ares-{{ checksum "project.clj" }}
+      - run: lein uberjar
+      - store_artifacts:
+          path: target/uberjar/ares-standalone.jar
+          destination: uberjar

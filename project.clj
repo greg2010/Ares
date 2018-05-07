@@ -12,5 +12,6 @@
                  [mount "0.1.12"]
                  [org.clojure/tools.cli "0.3.6"]]
   :main ^:skip-aot org.red.ares.core
+  :uberjar-name "ares-standalone.jar"
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}})

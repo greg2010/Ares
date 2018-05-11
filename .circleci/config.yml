@@ -14,6 +14,10 @@ jobs:
             - ~/.m2
           key: ares-{{ checksum "project.clj" }}
       - run: lein uberjar
+      - persist_to_workspace:
+          root: target
+          paths:
+            - uberjar
       - store_artifacts:
           path: target/uberjar/ares-standalone.jar
           destination: uberjar
@@ -22,7 +26,10 @@ jobs:
     docker:
       - image: docker:17.05.0-ce-git
     steps:
+      - checkout
       - setup_remote_docker
+      - attach_workspace:
+          at: target
       - run: docker build -t greg2010/ares .
       - run: docker tag greg2010/ares greg2010/ares:${CIRCLE_BRANCH}_${CIRCLE_SHA1:0:7}
       - run: docker tag greg2010/ares greg2010/ares:${CIRCLE_BRANCH}_latest

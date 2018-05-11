@@ -9,5 +9,6 @@ ADD ares.sv.conf /etc/supervisor/conf.d/
 
 RUN apk update
 RUN apk add supervisor
+RUN touch conf.edn
 
 CMD ["/usr/bin/supervisord", "-c", "/etc/supervisor/conf.d/ares.sv.conf"]

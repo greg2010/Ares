@@ -1,5 +1,9 @@
 # org.red/ares
 
+[![CircleCI](https://circleci.com/gh/greg2010/Ares.svg?style=svg)](https://circleci.com/gh/greg2010/Ares)
+[![](https://images.microbadger.com/badges/image/greg2010/ares.svg)](https://microbadger.com/images/greg2010/ares "Get your own image badge on microbadger.com")
+
+
 A tool that fetches information from [zKillboard] and posts relevant killmails to a discord channel via a webhook.
 
 Example:

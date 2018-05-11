@@ -1,0 +1,9 @@
+version: '2.1'
+
+services:
+  ares:
+    image: ares:latest
+    stdin_open: true
+    tty: true
+    volumes:
+      - PATH-TO-CONFIG:/red/conf.edn

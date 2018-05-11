@@ -18,13 +18,18 @@ Example:
 The project is intended to be used as an application, not a library, and therefore not published to clojars/maven.
 The latest precompiled binaries can be found in releases tab on github.
 
-## Usage
+## Usage - JVM
 
 Supply a config file via a cmd parameter `-c`
 
-Example: `java -jar ares-0.3.0-SNAPSHOT-standalone.jar -c example-config.edn`
+Example: `java -jar ares-standalone.jar -c example-config.edn`
 
 Example config can be found [here](https://raw.githubusercontent.com/greg2010/Ares/master/example-config.edn).
+
+## Usage - Docker
+* Pull a container from docker hub: `docker pull greg2010/ares:latest`
+* Run the image with the config mounted inside the container: `docker run -v PATH-TO-CONFIG:/red/conf.edn greg2010/ares:latest`
+* Alternatively, add path to your config file to `docker-compose.yml`, and use `docker-compose up` to start the instance.
 
 ## Change Log
 

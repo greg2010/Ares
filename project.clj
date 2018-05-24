@@ -10,7 +10,8 @@
                  [cheshire "5.8.0"]
                  [org.clojure/core.async "0.4.474"]
                  [mount "0.1.12"]
-                 [org.clojure/tools.cli "0.3.6"]]
+                 [org.clojure/tools.cli "0.3.6"]
+                 [overtone/at-at "1.2.0"]]
   :main ^:skip-aot org.red.ares.core
   :uberjar-name "ares-standalone.jar"
   :target-path "target/%s"
